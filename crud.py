@@ -4,7 +4,7 @@ from fastapi import HTTPException
 
 from models import NotesModel
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 
 
@@ -26,3 +26,9 @@ async def get_all(session: AsyncSession):
 async def get(id, session: AsyncSession):
     result = await session.execute(select(NotesModel).where(NotesModel.id==id))
     return result.scalars().all()
+
+async def put(id, session:AsyncSession, post_scheme):
+    upd = update(NotesModel).where(NotesModel.id == id).values(**post_scheme.dict()).returning(NotesModel)
+    result = await session.execute(upd)
+    await session.commit()
+    return result.scalar_one_or_none()
