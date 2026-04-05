@@ -2,7 +2,7 @@ from fastapi import FastAPI, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from schemes import PostScheme
 from models import get_session
-from crud import post, get_all, get, put
+from crud import post, get_all, get, put, delete_note
 from fastapi import Depends
 
 app = FastAPI()
@@ -35,3 +35,9 @@ async def note_put(note_id: int, post_scheme: PostScheme, session: AsyncSession 
         raise HTTPException(status_code=404, detail="Такой записи нет")
     return {"message":"Успешное изменение", "note":note}
 
+@app.delete("/note/delete/{note_id}", summary="Удаление заметки")
+async def note_del(note_id: int, session: AsyncSession = Depends(get_session)):
+    note = await delete_note(id=note_id, session=session)
+    if note is None:
+        raise HTTPException(status_code=404, detail="Такой записи нет")
+    return {"message":"Заметка успешно удалена", "delete_note":note}
